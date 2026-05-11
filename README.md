@@ -10,6 +10,9 @@ pinned: false
 
 # SHL Assessment Recommender — Conversational Agent
 
+**🚀 Live Demo:** [https://abd420-shl-agent.hf.space](https://abd420-shl-agent.hf.space)  
+*(Hosted on Hugging Face Spaces)*
+
 A production-ready, stateless conversational agent that recommends SHL Individual Test Solutions based on a hiring manager's requirements. Built as a FastAPI service with a real-time chat UI.
 
 > **Live Demo:** Run the server and open [http://localhost:8000](http://localhost:8000)
