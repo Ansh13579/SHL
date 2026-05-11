@@ -1,3 +1,13 @@
+---
+title: SHL Assessment Recommender
+emoji: 🧠
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+app_port: 8000
+pinned: false
+---
+
 # SHL Assessment Recommender — Conversational Agent
 
 A production-ready, stateless conversational agent that recommends SHL Individual Test Solutions based on a hiring manager's requirements. Built as a FastAPI service with a real-time chat UI.
