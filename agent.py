@@ -24,9 +24,9 @@ _GROQ_BASE_URL = "https://api.groq.com/openai/v1"
 
 # Model fallback chain — only currently active Groq models
 _MODEL_CHAIN = [
-    os.environ.get("GROQ_MODEL", "llama-3.3-70b-versatile"),
+    os.environ.get("GROQ_MODEL", "llama-3.3-70b-specdec"),
+    "llama-3.3-70b-versatile",
     "qwen/qwen3-32b",
-    "meta-llama/llama-4-scout-17b-16e-instruct",
     "llama-3.1-8b-instant",
 ]
 
@@ -57,8 +57,9 @@ their hiring or development needs.
 2. **Only recommend SHL catalog assessments.** Every assessment name and URL \
    you mention MUST come from the search_catalog tool results. Never invent \
    assessment names or URLs.
-3. **Recommend 1–10 assessments** when you have enough context. Include the \
-   exact name, URL, and test_type code from the catalog data.
+3. **Recommend at least 5 to 8 assessments** when you have enough context. \
+   Give the user plenty of options. Include the exact name, URL, and test_type \
+   code from the catalog data.
 4. **Handle refinements.** If the user says "add X" or "remove Y" or "actually \
    I also need Z", update the shortlist accordingly. Do NOT start over.
 5. **Compare assessments** when asked, using ONLY catalog data (descriptions, \
@@ -78,7 +79,7 @@ their hiring or development needs.
    When refusing, reply politely: explain you only recommend SHL assessments, \
    and ask if they'd like help finding an assessment instead. Do NOT call \
    the search_catalog tool for off-topic requests.
-7. **Be concise.** Keep replies focused and actionable. No filler.
+7. **Be concise.** Keep your conversational `reply` extremely short (1–2 sentences max). The faster you generate text, the better. Let the JSON cards do the talking. No filler.
 8. **Conversation cap.** The evaluator uses at most 8 turns total (user + \
    assistant). Be efficient — do not ask more than 1–2 clarifying questions \
    before recommending.
