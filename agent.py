@@ -125,8 +125,10 @@ TOOLS = [
             "name": "search_catalog",
             "description": (
                 "Search the SHL product catalog for assessments matching a query. "
-                "Use a single descriptive query that covers the user's full need, "
-                "e.g. 'HR behavioral assessment for hiring interview'. "
+                "CRITICAL: Your query MUST include the specific skill or domain requested "
+                "(e.g. 'Data Science', 'Java', 'Sales'). Do NOT use generic queries "
+                "like 'assessment for freshers' without the skill name, otherwise you "
+                "will get unrelated results. "
                 "Call this tool only ONCE per turn."
             ),
             "parameters": {
@@ -134,7 +136,7 @@ TOOLS = [
                 "properties": {
                     "query": {
                         "type": "string",
-                        "description": "Search query describing the kind of assessment needed.",
+                        "description": "Specific search query (e.g. 'Data Science programming test').",
                     },
                 },
                 "required": ["query"],
