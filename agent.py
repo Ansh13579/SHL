@@ -110,7 +110,7 @@ You must ALWAYS structure your response as valid JSON with exactly these fields:
   Each object: {"name": "...", "url": "https://www.shl.com/...", "test_type": "K"}
 - `end_of_conversation` is true ONLY when the user confirms the shortlist or \
   says they are done.
-- The `reply` field must be a human-readable conversational message.
+- The `reply` field must be a conversational message. **CRITICAL: DO NOT include markdown lists, bullet points, or URLs of assessments in the `reply` text.** Put the assessments ONLY in the `recommendations` JSON array. The UI will render the array as clickable cards automatically.
 
 IMPORTANT: Return ONLY the JSON object. No markdown, no code fences, no extra text.
 """
