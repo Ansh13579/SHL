@@ -6,13 +6,14 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Pre-download the sentence-transformers model at build time
-RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')"
-
-# Copy application code, catalog, and frontend
-COPY main.py agent.py catalog.py ./
+# Copy source code, catalog, and frontend
+COPY main.py agent.py catalog.py prebuild_index.py ./
 COPY shl_product_catalog.json ./
 COPY static/ ./static/
+
+# Pre-build embeddings at build time (avoids slow first-request on Render)
+# This also downloads the sentence-transformers model into the image
+RUN python prebuild_index.py
 
 # Port (Render sets $PORT dynamically)
 EXPOSE 8000

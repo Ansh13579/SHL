@@ -142,21 +142,39 @@ class SHLCatalog:
     def _ensure_index(self):
         if self._index is not None:
             return
-        logger.info("Building FAISS index (first call) …")
-        self._model = SentenceTransformer("all-MiniLM-L6-v2")
-        texts = [a.embedding_text() for a in self.assessments]
-        self._embeddings = self._model.encode(
-            texts, normalize_embeddings=True, show_progress_bar=False,
-        )
-        dim = self._embeddings.shape[1]
-        self._index = faiss.IndexFlatIP(dim)
-        self._index.add(self._embeddings.astype(np.float32))
-        logger.info("FAISS index built — %d vectors, dim=%d.", len(texts), dim)
+
+        # Try to load pre-built embeddings first (fast, low RAM)
+        prebuilt_path = Path(__file__).parent / "embeddings.npy"
+        if prebuilt_path.exists():
+            logger.info("Loading pre-built embeddings from %s …", prebuilt_path)
+            self._embeddings = np.load(str(prebuilt_path)).astype(np.float32)
+            dim = self._embeddings.shape[1]
+            self._index = faiss.IndexFlatIP(dim)
+            self._index.add(self._embeddings)
+            logger.info("FAISS index loaded — %d vectors, dim=%d.", len(self.assessments), dim)
+        else:
+            # Fallback: compute embeddings (requires sentence-transformers)
+            logger.info("Building FAISS index (first call) …")
+            self._model = SentenceTransformer("all-MiniLM-L6-v2")
+            texts = [a.embedding_text() for a in self.assessments]
+            self._embeddings = self._model.encode(
+                texts, normalize_embeddings=True, show_progress_bar=False,
+            )
+            dim = self._embeddings.shape[1]
+            self._index = faiss.IndexFlatIP(dim)
+            self._index.add(self._embeddings.astype(np.float32))
+            logger.info("FAISS index built — %d vectors, dim=%d.", len(texts), dim)
+
+    def _ensure_model(self):
+        """Load the sentence-transformers model for query encoding."""
+        if self._model is None:
+            self._model = SentenceTransformer("all-MiniLM-L6-v2")
 
     # ----- public API -----
     def search(self, query: str, top_k: int = 15) -> list[Assessment]:
         """Return the top_k most relevant assessments for a query string."""
         self._ensure_index()
+        self._ensure_model()
         q_emb = self._model.encode([query], normalize_embeddings=True).astype(np.float32)
         scores, indices = self._index.search(q_emb, top_k)
         results = []
@@ -168,6 +186,7 @@ class SHLCatalog:
     def search_multi(self, queries: list[str], top_k: int = 15) -> list[Assessment]:
         """Run multiple queries and merge/deduplicate the results (union, ranked by best score)."""
         self._ensure_index()
+        self._ensure_model()
         seen_ids: set[str] = set()
         merged: list[tuple[float, Assessment]] = []
         for query in queries:
@@ -193,3 +212,4 @@ class SHLCatalog:
 
 # Module-level singleton — imported by agent.py
 catalog = SHLCatalog()
+
