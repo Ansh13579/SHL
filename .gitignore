@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+.env
+*.egg-info/
+dist/
+build/
+pdf_content.txt
+extract_pdf.py
+sample_conversations.zip
+sample_conversations/
+*.zip
+_list_models.py
+SHL_AI_Intern_Assignment.pdf

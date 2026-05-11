@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHL Assessment Advisor</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --chat-bg: rgba(30, 41, 59, 0.7);
+            --user-msg: #3b82f6;
+            --agent-msg: rgba(51, 65, 85, 0.8);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #38bdf8;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 900px;
+            height: 90vh;
+            background: var(--chat-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+
+        .header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header h1 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            letter-spacing: -0.025em;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .header .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #38bdf8 0%, #3b82f6 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+
+        .chat-history {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            scroll-behavior: smooth;
+        }
+
+        .chat-history::-webkit-scrollbar {
+            width: 6px;
+        }
+        .chat-history::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .chat-history::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 10px;
+        }
+
+        .message {
+            display: flex;
+            flex-direction: column;
+            max-width: 80%;
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            align-self: flex-end;
+            align-items: flex-end;
+        }
+
+        .message.agent {
+            align-self: flex-start;
+            align-items: flex-start;
+        }
+
+        .bubble {
+            padding: 16px 20px;
+            border-radius: 20px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+
+        .message.user .bubble {
+            background: var(--user-msg);
+            color: white;
+            border-bottom-right-radius: 4px;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .message.agent .bubble {
+            background: var(--agent-msg);
+            border: 1px solid var(--border);
+            border-bottom-left-radius: 4px;
+        }
+
+        .recommendation-card {
+            margin-top: 12px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .recommendation-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            border-color: var(--accent);
+        }
+
+        .rec-title {
+            color: var(--accent);
+            font-weight: 600;
+            margin-bottom: 6px;
+            font-size: 0.95rem;
+        }
+
+        .rec-type {
+            font-size: 0.75rem;
+            background: rgba(56, 189, 248, 0.1);
+            color: var(--accent);
+            padding: 2px 8px;
+            border-radius: 10px;
+            display: inline-block;
+        }
+
+        .input-area {
+            padding: 20px 24px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 12px;
+            background: rgba(15, 23, 42, 0.4);
+        }
+
+        .input-box {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            padding: 14px 24px;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: all 0.2s;
+            outline: none;
+        }
+
+        .input-box:focus {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
+        }
+
+        .send-btn {
+            background: var(--user-msg);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+            background: #2563eb;
+        }
+
+        .send-btn:active {
+            transform: scale(0.95);
+        }
+
+        .send-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+            margin-left: 2px;
+        }
+
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 8px 0;
+            align-items: center;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            background: var(--text-muted);
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .dot:nth-child(1) { animation-delay: -0.32s; }
+        .dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+
+        .system-notice {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="chat-container">
+    <div class="header">
+        <div class="avatar">AI</div>
+        <div>
+            <h1>SHL Assessment Advisor</h1>
+            <p>Powered by Groq & LLaMA 3.3</p>
+        </div>
+    </div>
+    
+    <div class="chat-history" id="chat-history">
+        <div class="message agent">
+            <div class="bubble">
+                Hello! I am the SHL Assessment Advisor. I can help you find the perfect test or assessment for your hiring and development needs from our catalog. What kind of role or skills are you looking to assess?
+            </div>
+        </div>
+    </div>
+
+    <div class="input-area">
+        <input type="text" id="user-input" class="input-box" placeholder="E.g., I need a Java assessment for a mid-level developer..." autocomplete="off">
+        <button id="send-btn" class="send-btn">
+            <svg viewBox="0 0 24 24">
+                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+            </svg>
+        </button>
+    </div>
+</div>
+
+<script>
+    // Global conversation state matching the API schema
+    let conversationHistory = [];
+
+    const chatHistoryEl = document.getElementById('chat-history');
+    const userInputEl = document.getElementById('user-input');
+    const sendBtnEl = document.getElementById('send-btn');
+
+    function appendMessage(role, content, recommendations = null) {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `message ${role}`;
+        
+        let html = `<div class="bubble">${content.replace(/\n/g, '<br>')}</div>`;
+        
+        if (recommendations && recommendations.length > 0) {
+            html += `<div style="margin-top: 8px;">`;
+            recommendations.forEach(rec => {
+                html += `
+                    <a href="${rec.url}" target="_blank" class="recommendation-card">
+                        <div class="rec-title">${rec.name}</div>
+                        <div class="rec-type">Type: ${rec.test_type}</div>
+                    </a>
+                `;
+            });
+            html += `</div>`;
+        }
+        
+        msgDiv.innerHTML = html;
+        chatHistoryEl.appendChild(msgDiv);
+        chatHistoryEl.scrollTop = chatHistoryEl.scrollHeight;
+    }
+
+    function showTyping() {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'message agent typing';
+        msgDiv.id = 'typing-indicator';
+        msgDiv.innerHTML = `
+            <div class="bubble" style="padding: 12px 20px;">
+                <div class="typing-indicator">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </div>
+            </div>
+        `;
+        chatHistoryEl.appendChild(msgDiv);
+        chatHistoryEl.scrollTop = chatHistoryEl.scrollHeight;
+    }
+
+    function removeTyping() {
+        const el = document.getElementById('typing-indicator');
+        if (el) el.remove();
+    }
+
+    async function sendMessage() {
+        const text = userInputEl.value.trim();
+        if (!text) return;
+
+        userInputEl.value = '';
+        userInputEl.disabled = true;
+        sendBtnEl.disabled = true;
+
+        appendMessage('user', text);
+        conversationHistory.push({ role: 'user', content: text });
+
+        showTyping();
+
+        try {
+            const response = await fetch('/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ messages: conversationHistory })
+            });
+
+            const data = await response.json();
+            removeTyping();
+
+            if (data.reply) {
+                appendMessage('agent', data.reply, data.recommendations);
+                conversationHistory.push({ role: 'assistant', content: data.reply });
+            } else {
+                appendMessage('agent', "I'm sorry, I encountered an error formatting my response.");
+            }
+
+            if (data.end_of_conversation) {
+                const notice = document.createElement('div');
+                notice.className = 'system-notice';
+                notice.innerText = '— Conversation Ended —';
+                chatHistoryEl.appendChild(notice);
+                chatHistoryEl.scrollTop = chatHistoryEl.scrollHeight;
+            } else {
+                userInputEl.disabled = false;
+                sendBtnEl.disabled = false;
+                userInputEl.focus();
+            }
+
+        } catch (error) {
+            console.error('API Error:', error);
+            removeTyping();
+            appendMessage('agent', "Connection error. Please ensure the server is running and try again.");
+            userInputEl.disabled = false;
+            sendBtnEl.disabled = false;
+            userInputEl.focus();
+        }
+    }
+
+    sendBtnEl.addEventListener('click', sendMessage);
+    userInputEl.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') sendMessage();
+    });
+
+    // Initial focus
+    userInputEl.focus();
+</script>
+
+</body>
+</html>
