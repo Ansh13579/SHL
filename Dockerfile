@@ -14,8 +14,8 @@ COPY main.py agent.py catalog.py ./
 COPY shl_product_catalog.json ./
 COPY static/ ./static/
 
-# Port
+# Port (Render sets $PORT dynamically)
 EXPOSE 8000
 
-# Run
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Run — use shell form so $PORT is resolved at runtime
+CMD uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}
